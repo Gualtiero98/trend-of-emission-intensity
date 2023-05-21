@@ -1,8 +1,9 @@
 import pandas as pd
 import geopandas as gpd
 import matplotlib.pyplot as plt
-%matplotlib inline #by default usually it is active
-from shapely.geometry import polygon
+%matplotlib inline 
+#by default usually it is active
+from shapely.geometry import Polygon
 import warnings
 warnings.filterwarnings(action = "ignore")
 
@@ -11,21 +12,24 @@ plt.rcParams["figure.figsize"]=(12,10)
 plt.rcParams["font.size"]=12
 
 #create a geodataframe
-world = gdp.read_file(gdp.datasets.get_path("naturalearth_lowres"))
+world = gpd.read_file(gpd.datasets.get_path("naturalearth_lowres"))
 world.plot()
 europe = world[world.continent == "Europe"]
 europe.plot()
 
 #we exclude Russia and Iceland, focusing on mainland Europe
-europe = europe(europe.name != "Russia") & (europe.name != "Iceland") 
+europe = europe[(europe.name != "Russia") & (europe.name != "Iceland")]
 
-world.crs #gives us the coordinate system corresponding to the world geodataframe
+#gives us the coordinate system corresponding to the world geodataframe
+world.crs 
 
-#create a custom polygon
-polygon = Polygon([(-25, 35), (40,35), (40,75), (-25,75)])  
+#create a custom polygon to address the area of interest
+polygon = Polygon([(-25, 35), (40,35), (40,75), (-25,75)]) 
+polygon
 
 #makes a new geodataframe. Data is the 1000 (i.e. anything), we place the geometry and the coordinate system is that of world
 poly_gdf = gpd.GeoDataFrame([1000], geometry = [polygon], crs = world.crs)
+poly_gdf
 
 fig,ax = plt.subplots()
 ax = europe.plot(ax=ax)
@@ -33,7 +37,7 @@ poly_gdf.plot(edgecolor = "red", ax = ax, alpha = 0.1) #we plot the grey area be
 plt.show()
 
 #we remove French Guinea
-europe = gdp.clip(europe, polygon)
+europe = gpd.clip(europe, polygon)
 europe.plot()
 
 #now we use the data from the dataset
@@ -44,11 +48,10 @@ europe.name.unique()
 #unmatched: countries which are present in df, but not in Europe
 unmatched = []
 for c in list(df["Entity"].unique()):
-    if c in list(europe.name.unique()):
+    if c in (list(europe.name.unique())):
         pass
     else:
         unmatched.append(c)
-
 unmatched
 
 df.Year.unique()
